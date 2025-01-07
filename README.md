@@ -190,6 +190,70 @@ Response: {
 }
 ```
 
+## 🐳 Docker Deployment
+
+### Prerequisites
+- Docker
+- Docker Compose
+
+### Running with Docker
+
+1. Build and start the containers:
+```bash
+docker-compose up -d --build
+```
+
+2. View logs:
+```bash
+docker-compose logs -f
+```
+
+3. Stop the containers:
+```bash
+docker-compose down
+```
+
+### Docker Configuration
+
+The application is containerized with the following features:
+- Base image: Python 3.9-slim
+- Automatic environment variable injection
+- Volume mapping for logs and development
+- Health checks for all services
+- Redis container for session management
+- Hot-reload support for development
+- Proper security configurations
+
+### Container Management
+
+Monitor container health:
+```bash
+docker-compose ps
+```
+
+View container logs:
+```bash
+# All containers
+docker-compose logs
+
+# Specific service
+docker-compose logs voice-agent
+```
+
+Restart services:
+```bash
+docker-compose restart voice-agent
+```
+
+### Production Deployment
+
+For production deployment, consider:
+1. Using Docker Swarm or Kubernetes for orchestration
+2. Implementing proper SSL/TLS termination
+3. Setting up monitoring with Prometheus/Grafana
+4. Configuring proper backup strategies
+5. Implementing CI/CD pipelines
+
 ## 🤝 Contributing
 
 1. Fork the repository

@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  voice-agent:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: voice-agent
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./logs:/app/logs
+      - .:/app  # For development hot-reload
+    environment:
+      - RETELL_API_KEY=${RETELL_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DEEPGRAM_API_KEY=${DEEPGRAM_API_KEY}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+    networks:
+      - voice-agent-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis for session management and caching (optional but recommended for production)
+  redis:
+    image: redis:7-alpine
+    container_name: voice-agent-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - voice-agent-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Redis Commander for Redis monitoring
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: voice-agent-redis-commander
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    networks:
+      - voice-agent-network
+    depends_on:
+      - redis
+
+volumes:
+  redis-data:
+    driver: local
+
+networks:
+  voice-agent-network:
+    driver: bridge
